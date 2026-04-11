@@ -1,7 +1,16 @@
+import { MapCanvas } from "./components/MapCanvas";
+import { EditorSidebar } from "./components/EditorSidebar";
+
 function App() {
   return (
-    <div>
-      <h1>Train Map Maker</h1>
+    <div className="flex h-screen w-full bg-background overflow-hidden text-foreground">
+      {/* Main Canvas Area */}
+      <div className="flex-1 relative">
+        <MapCanvas />
+      </div>
+
+      {/* Editor Sidebar */}
+      <EditorSidebar />
     </div>
   );
 }
