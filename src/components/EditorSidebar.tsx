@@ -501,6 +501,13 @@ export function EditorSidebar() {
               </div>
             )}
           </section>
+
+          {/* Copyright Notice */}
+          <section className="pt-8 text-center">
+            <p className="text-[10px] text-muted-foreground/50 font-medium tracking-widest">
+              (C) 2026 e6nlaq
+            </p>
+          </section>
         </div>
       </ScrollArea>
 
