@@ -1,5 +1,8 @@
 # e6nlaq式路線図メーカー (Train Map Maker)
 
+<img width="2528" height="1408" alt="image" src="https://github.com/user-attachments/assets/95be15b9-1002-471a-bc7e-5f0920b4472c" />
+
+
 > [!IMPORTANT]
 > 自分用に全部AIに作らせました。自己責任でご自由にお使いください。
 
