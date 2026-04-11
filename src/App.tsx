@@ -1,5 +1,5 @@
-import { MapCanvas } from "./components/MapCanvas";
 import { EditorSidebar } from "./components/EditorSidebar";
+import { MapCanvas } from "./components/MapCanvas";
 
 function App() {
   return (

@@ -1,6 +1,6 @@
+import { nanoid } from "nanoid";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { nanoid } from "nanoid";
 
 export type Station = {
   id: string;
@@ -53,7 +53,11 @@ type MapState = {
   setConnectionStart: (id: string | null) => void;
   toggleLegend: () => void;
   resetMap: () => void;
-  importData: (data: { stations: Record<string, Station>, lines: Record<string, Line>, edges: Record<string, Edge> }) => void;
+  importData: (data: {
+    stations: Record<string, Station>;
+    lines: Record<string, Line>;
+    edges: Record<string, Edge>;
+  }) => void;
 };
 
 export const useMapStore = create<MapState>()(
@@ -74,7 +78,14 @@ export const useMapStore = create<MapState>()(
         set((state) => ({
           stations: {
             ...state.stations,
-            [id]: { id, name: "新駅", nameEn: "New Station", numbering: "", x, y },
+            [id]: {
+              id,
+              name: "新駅",
+              nameEn: "New Station",
+              numbering: "",
+              x,
+              y,
+            },
           },
         }));
         return id;
@@ -97,7 +108,10 @@ export const useMapStore = create<MapState>()(
           // Remove all edges connected to this station
           const newEdges = { ...state.edges };
           for (const edgeId in newEdges) {
-            if (newEdges[edgeId].station1Id === id || newEdges[edgeId].station2Id === id) {
+            if (
+              newEdges[edgeId].station1Id === id ||
+              newEdges[edgeId].station2Id === id
+            ) {
               delete newEdges[edgeId];
             }
           }
@@ -105,8 +119,10 @@ export const useMapStore = create<MapState>()(
           return {
             stations: newStations,
             edges: newEdges,
-            selectedStationId: state.selectedStationId === id ? null : state.selectedStationId,
-            connectionStartId: state.connectionStartId === id ? null : state.connectionStartId,
+            selectedStationId:
+              state.selectedStationId === id ? null : state.selectedStationId,
+            connectionStartId:
+              state.connectionStartId === id ? null : state.connectionStartId,
           };
         });
       },
@@ -148,20 +164,21 @@ export const useMapStore = create<MapState>()(
           return {
             lines: newLines,
             edges: newEdges,
-            selectedLineId: state.selectedLineId === id ? null : state.selectedLineId,
+            selectedLineId:
+              state.selectedLineId === id ? null : state.selectedLineId,
           };
         });
       },
 
       addEdge: (s1, s2, lineId) => {
         if (s1 === s2) return null;
-        
+
         // Check if edge already exists for this line
         const exists = Object.values(get().edges).some(
           (e) =>
             e.lineId === lineId &&
             ((e.station1Id === s1 && e.station2Id === s2) ||
-              (e.station1Id === s2 && e.station2Id === s1))
+              (e.station1Id === s2 && e.station2Id === s1)),
         );
         if (exists) return null;
 
@@ -172,7 +189,7 @@ export const useMapStore = create<MapState>()(
             [id]: { id, station1Id: s1, station2Id: s2, lineId },
           },
           // Chain connection by making the second station the new start
-          connectionStartId: s2
+          connectionStartId: s2,
         }));
         return id;
       },
@@ -183,14 +200,15 @@ export const useMapStore = create<MapState>()(
           delete newEdges[id];
           return {
             edges: newEdges,
-            selectedEdgeId: state.selectedEdgeId === id ? null : state.selectedEdgeId,
+            selectedEdgeId:
+              state.selectedEdgeId === id ? null : state.selectedEdgeId,
           };
         });
       },
 
       selectStation: (id) => {
         const state = get();
-        
+
         if (state.editMode === "connect" && state.selectedLineId && id) {
           if (state.connectionStartId && state.connectionStartId !== id) {
             // Connect and then set 'id' as the new start (chaining)
@@ -205,7 +223,7 @@ export const useMapStore = create<MapState>()(
           state.removeStation(id);
           return;
         }
-        
+
         set({ selectedStationId: id });
       },
 
@@ -215,28 +233,30 @@ export const useMapStore = create<MapState>()(
       setConnectionStart: (id) => set({ connectionStartId: id }),
       toggleLegend: () => set((state) => ({ showLegend: !state.showLegend })),
 
-      resetMap: () => set({
-        stations: {},
-        lines: {},
-        edges: {},
-        selectedStationId: null,
-        selectedLineId: null,
-        selectedEdgeId: null,
-        connectionStartId: null
-      }),
+      resetMap: () =>
+        set({
+          stations: {},
+          lines: {},
+          edges: {},
+          selectedStationId: null,
+          selectedLineId: null,
+          selectedEdgeId: null,
+          connectionStartId: null,
+        }),
 
-      importData: (data) => set({
-        stations: data.stations || {},
-        lines: data.lines || {},
-        edges: data.edges || {},
-        selectedStationId: null,
-        selectedLineId: null,
-        selectedEdgeId: null,
-        connectionStartId: null
-      }),
+      importData: (data) =>
+        set({
+          stations: data.stations || {},
+          lines: data.lines || {},
+          edges: data.edges || {},
+          selectedStationId: null,
+          selectedLineId: null,
+          selectedEdgeId: null,
+          connectionStartId: null,
+        }),
     }),
     {
       name: "trainmap-graph-storage",
-    }
-  )
+    },
+  ),
 );
