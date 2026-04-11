@@ -62,7 +62,12 @@ export function EditorSidebar() {
   const linesArray = Object.values(lines);
 
   const handleAddLine = () => {
-    const id = addLine(`New Line ${linesArray.length + 1}`, "#EE7B00");
+    const colors = [
+      "#FF9500", "#F62E36", "#009BBF", "#00BB85", "#8F76D6",
+      "#00AC9B", "#C1A470", "#9C5E31", "#B5B5AC", "#E60012"
+    ];
+    const sequenceColor = colors[linesArray.length % colors.length];
+    const id = addLine(`路線 ${linesArray.length + 1}`, sequenceColor);
     selectLine(id);
   };
 
@@ -98,8 +103,8 @@ export function EditorSidebar() {
 
   return (
     <div className="w-80 border-l bg-card h-full flex flex-col shrink-0">
-      <div className="p-4 border-b flex items-center justify-between font-semibold">
-        Editor
+      <div className="p-4 border-b flex items-center justify-between font-bold">
+        エディター
       </div>
 
       <div className="p-4 border-b">
@@ -137,7 +142,7 @@ export function EditorSidebar() {
           <section className="space-y-4">
             <h3 className="text-sm font-medium text-muted-foreground flex items-center gap-2 uppercase tracking-wider">
               <Info className="size-3" />
-              Station Info
+              駅情報
             </h3>
 
             {!selectedStation ? (
@@ -147,7 +152,7 @@ export function EditorSidebar() {
             ) : (
               <div className="space-y-4">
                 <div className="grid gap-1.5">
-                  <Label htmlFor="station-name">Name</Label>
+                  <Label htmlFor="station-name">駅名</Label>
                   <Input
                     id="station-name"
                     value={selectedStation.name}
@@ -160,7 +165,7 @@ export function EditorSidebar() {
                 </div>
 
                 <div className="grid gap-1.5">
-                  <Label htmlFor="station-name-en">English Name</Label>
+                  <Label htmlFor="station-name-en">駅名 (英語)</Label>
                   <Input
                     id="station-name-en"
                     value={selectedStation.nameEn}
@@ -173,7 +178,7 @@ export function EditorSidebar() {
                 </div>
 
                 <div className="grid gap-1.5">
-                  <Label htmlFor="station-number">Numbering</Label>
+                  <Label htmlFor="station-number">ナンバリング</Label>
                   <Input
                     id="station-number"
                     placeholder="M17 C07"
@@ -193,7 +198,7 @@ export function EditorSidebar() {
                   onClick={() => removeStation(selectedStation.id)}
                 >
                   <Trash2 className="size-3 mr-2" />
-                  駅を削除
+                  この駅を削除
                 </Button>
               </div>
             )}
@@ -204,7 +209,7 @@ export function EditorSidebar() {
             <div className="flex items-center justify-between">
               <h3 className="text-sm font-medium text-muted-foreground flex items-center gap-2 uppercase tracking-wider">
                 <Route className="size-3" />
-                Lines
+                路線
               </h3>
               <div className="flex items-center gap-4">
                 <div className="flex items-center gap-2">
@@ -212,7 +217,7 @@ export function EditorSidebar() {
                     htmlFor="legend-toggle"
                     className="text-[10px] font-bold uppercase text-muted-foreground/60"
                   >
-                    Legend
+                    凡例
                   </Label>
                   <Switch
                     id="legend-toggle"
@@ -228,7 +233,7 @@ export function EditorSidebar() {
                   className="h-8 shadow-sm"
                 >
                   <Plus className="size-3 mr-1" />
-                  Add
+                  追加
                 </Button>
               </div>
             </div>
@@ -286,9 +291,9 @@ export function EditorSidebar() {
                       {isSelected && (
                         <div className="mt-3 pt-3 border-t space-y-3 animate-in fade-in slide-in-from-top-1 duration-200">
                           <div className="text-[10px] text-muted-foreground flex justify-between px-1">
-                            <span>Active Selection</span>
+                            <span>選択中</span>
                             <span>
-                              {stationCount} Stations • {lineEdges.length} Edges
+                              {stationCount} 駅 • {lineEdges.length} 区間
                             </span>
                           </div>
 
@@ -301,7 +306,7 @@ export function EditorSidebar() {
                               removeLine(line.id);
                             }}
                           >
-                            Delete Line
+                            この路線を削除
                           </Button>
                         </div>
                       )}
@@ -317,19 +322,19 @@ export function EditorSidebar() {
       {/* File Operations (Fixed footer at the bottom) */}
       <div className="p-4 border-t bg-muted/5 space-y-4">
         <div className="flex items-center justify-between px-1">
-            <Label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
-            Project Management
-            </Label>
-            <a 
-                href="https://github.com/e6nlaq/trainmap-maker#使い方" 
-                target="_blank" 
-                rel="noreferrer"
-                className="text-[10px] text-primary hover:underline flex items-center gap-1 font-bold italic"
-            >
-                HELP / README <ExternalLink className="size-2.5" />
-            </a>
+          <Label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+            プロジェクト管理
+          </Label>
+          <a
+            href="https://github.com/e6nlaq/trainmap-maker#使い方"
+            target="_blank"
+            rel="noreferrer"
+            className="text-[10px] text-primary hover:underline flex items-center gap-1 font-bold"
+          >
+            使い方を表示 <ExternalLink className="size-2.5" />
+          </a>
         </div>
-        
+
         <div className="grid grid-cols-2 gap-2">
           <Button
             variant="outline"
@@ -338,21 +343,19 @@ export function EditorSidebar() {
             className="h-8 text-[11px]"
           >
             <Download className="size-3 mr-2" />
-            エクスポート
+            書き出し
           </Button>
 
           <AlertDialog>
             <AlertDialogTrigger asChild>
               <Button variant="outline" size="sm" className="h-8 text-[11px]">
                 <Upload className="size-3 mr-2" />
-                インポート
+                読み込み
               </Button>
             </AlertDialogTrigger>
             <AlertDialogContent>
               <AlertDialogHeader>
-                <AlertDialogTitle>
-                  マップをインポートしますか？
-                </AlertDialogTitle>
+                <AlertDialogTitle>マップを読み込みますか？</AlertDialogTitle>
                 <AlertDialogDescription>
                   現在の編集内容はすべて上書きされます。よろしいですか？
                 </AlertDialogDescription>
@@ -384,16 +387,16 @@ export function EditorSidebar() {
                 className="h-8 text-[11px] text-destructive hover:text-destructive col-span-2"
               >
                 <RotateCcw className="size-3 mr-2" />
-                全リセット
+                すべてリセット
               </Button>
             </AlertDialogTrigger>
             <AlertDialogContent>
               <AlertDialogHeader>
                 <AlertDialogTitle>
-                  全てのデータを消去しますか？
+                  データを完全に消去しますか？
                 </AlertDialogTitle>
                 <AlertDialogDescription>
-                  駅、路線、接続情報が全て削除されます。この操作は取り消せません。
+                  駅、路線、接続情報がすべて削除されます。この操作は取り消せません。
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
@@ -402,7 +405,7 @@ export function EditorSidebar() {
                   onClick={resetMap}
                   className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                 >
-                  全て消去
+                  消去する
                 </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>

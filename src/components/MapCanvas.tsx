@@ -412,7 +412,7 @@ export function MapCanvas() {
 
       <div className="absolute top-4 left-4 p-3 bg-background/80 backdrop-blur border rounded-md shadow-sm pointer-events-none text-xs space-y-1">
         <div className="font-semibold text-primary mb-1">
-          Tokyo Metro Style Editor
+          e6nlaq式路線図メーカー
         </div>
         <div className="text-muted-foreground flex items-center gap-2">
           モード:{" "}
