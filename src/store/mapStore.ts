@@ -34,6 +34,7 @@ type MapState = {
   editMode: "select" | "connect" | "move" | "delete";
   connectionStartId: string | null;
   showLegend: boolean;
+  lineOrder: string[];
 
   addStation: (x: number, y: number) => string;
   updateStation: (id: string, updates: Partial<Station>) => void;
@@ -42,6 +43,7 @@ type MapState = {
   addLine: (name: string, color: string) => string;
   updateLine: (id: string, updates: Partial<Line>) => void;
   removeLine: (id: string) => void;
+  reorderLines: (startIndex: number, endIndex: number) => void;
 
   addEdge: (s1: string, s2: string, lineId: string) => string | null;
   removeEdge: (id: string) => void;
@@ -57,6 +59,7 @@ type MapState = {
     stations: Record<string, Station>;
     lines: Record<string, Line>;
     edges: Record<string, Edge>;
+    lineOrder?: string[];
   }) => void;
 };
 
@@ -72,6 +75,7 @@ export const useMapStore = create<MapState>()(
       editMode: "select",
       connectionStartId: null,
       showLegend: true,
+      lineOrder: [],
 
       addStation: (x, y) => {
         const id = nanoid();
@@ -134,6 +138,7 @@ export const useMapStore = create<MapState>()(
             ...state.lines,
             [id]: { id, name, color },
           },
+          lineOrder: [...state.lineOrder, id],
           selectedLineId: id,
         }));
         return id;
@@ -164,9 +169,19 @@ export const useMapStore = create<MapState>()(
           return {
             lines: newLines,
             edges: newEdges,
+            lineOrder: state.lineOrder.filter((lineId) => lineId !== id),
             selectedLineId:
               state.selectedLineId === id ? null : state.selectedLineId,
           };
+        });
+      },
+
+      reorderLines: (startIndex, endIndex) => {
+        set((state) => {
+          const newOrder = [...state.lineOrder];
+          const [removed] = newOrder.splice(startIndex, 1);
+          newOrder.splice(endIndex, 0, removed);
+          return { lineOrder: newOrder };
         });
       },
 
@@ -238,6 +253,7 @@ export const useMapStore = create<MapState>()(
           stations: {},
           lines: {},
           edges: {},
+          lineOrder: [],
           selectedStationId: null,
           selectedLineId: null,
           selectedEdgeId: null,
@@ -249,6 +265,7 @@ export const useMapStore = create<MapState>()(
           stations: data.stations || {},
           lines: data.lines || {},
           edges: data.edges || {},
+          lineOrder: data.lineOrder || Object.keys(data.lines || {}),
           selectedStationId: null,
           selectedLineId: null,
           selectedEdgeId: null,
@@ -257,6 +274,18 @@ export const useMapStore = create<MapState>()(
     }),
     {
       name: "trainmap-graph-storage",
+      version: 1,
+      migrate: (persistedState: any, version: number) => {
+        if (version === 0) {
+          // If migrating from older version without lineOrder, initialize it from lines
+          if (persistedState && persistedState.lines) {
+            persistedState.lineOrder = Object.keys(persistedState.lines);
+          } else {
+            persistedState.lineOrder = [];
+          }
+        }
+        return persistedState;
+      },
     },
   ),
 );

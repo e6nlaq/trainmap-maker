@@ -10,10 +10,11 @@ export function MapCanvas() {
   const gRef = useRef<SVGGElement>(null);
   const stationsLayerRef = useRef<SVGGElement>(null);
 
-  const {
+    const {
     stations,
     lines,
     edges,
+    lineOrder,
     addStation,
     updateStation,
     selectStation,
@@ -23,6 +24,7 @@ export function MapCanvas() {
     selectEdge,
     removeEdge,
     editMode,
+    setEditMode,
     connectionStartId,
     setConnectionStart,
     showLegend,
@@ -30,7 +32,9 @@ export function MapCanvas() {
 
   const stationsArray = Object.values(stations);
   const edgesArray = Object.values(edges);
-  const linesArray = Object.values(lines);
+  const linesArray = (lineOrder && lineOrder.length > 0) 
+    ? lineOrder.map(id => lines[id]).filter(Boolean)
+    : Object.values(lines);
 
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
 
@@ -146,6 +150,34 @@ export function MapCanvas() {
     }
   };
 
+  // Keyboard Shortcuts for Modes
+  useEffect(() => {
+    const handleGlobalKeyDown = (e: KeyboardEvent) => {
+      // Don't trigger if user is typing in an input
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
+        return;
+      }
+
+      switch (e.key) {
+        case "1":
+          setEditMode("select");
+          break;
+        case "2":
+          setEditMode("connect");
+          break;
+        case "3":
+          setEditMode("move");
+          break;
+        case "4":
+          setEditMode("delete");
+          break;
+      }
+    };
+
+    window.addEventListener("keydown", handleGlobalKeyDown);
+    return () => window.removeEventListener("keydown", handleGlobalKeyDown);
+  }, [setEditMode]);
+
   const startStation = connectionStartId ? stations[connectionStartId] : null;
 
   return (
@@ -154,6 +186,7 @@ export function MapCanvas() {
       onClick={handleCanvasClick}
       onKeyDown={handleKeyDown}
       role="presentation"
+      tabIndex={-1} // Ensure it can receive keyboard events if needed, but we use window listener
     >
       <svg
         ref={svgRef}
@@ -211,48 +244,84 @@ export function MapCanvas() {
 
           {/* Render Edges */}
           <g className="edges-layer">
-            {edgesArray.map((edge) => {
-              const s1 = stations[edge.station1Id];
-              const s2 = stations[edge.station2Id];
-              if (!s1 || !s2) return null;
+            {(() => {
+              // Group edges by station pair (undirected) to handle parallel lines
+              const edgeGroups: Record<string, typeof edgesArray> = {};
+              for (const edge of edgesArray) {
+                const pairId = [edge.station1Id, edge.station2Id]
+                  .sort()
+                  .join("-");
+                if (!edgeGroups[pairId]) edgeGroups[pairId] = [];
+                edgeGroups[pairId].push(edge);
+              }
 
-              const line = lines[edge.lineId];
-              const isSelected = selectedEdgeId === edge.id;
-              const isLineActive = selectedLineId === edge.lineId;
+              return Object.entries(edgeGroups).map(([_, rawGroup]) => {
+                // IMPORTANT: Sort the group by the global lineOrder to ensure stable parallel positions
+                const group = [...rawGroup].sort((a, b) => {
+                  return lineOrder.indexOf(a.lineId) - lineOrder.indexOf(b.lineId);
+                });
 
-              return (
-                <g key={edge.id} className="edge-group">
-                  <line
-                    x1={s1.x}
-                    y1={s1.y}
-                    x2={s2.x}
-                    y2={s2.y}
-                    stroke="transparent"
-                    strokeWidth="20"
-                    className="cursor-pointer"
-                    onClick={(e) => handleEdgeClick(e, edge.id)}
-                  />
-                  <line
-                    x1={s1.x}
-                    y1={s1.y}
-                    x2={s2.x}
-                    y2={s2.y}
-                    stroke={line?.color || "#000"}
-                    strokeWidth={isSelected ? 14 : 10}
-                    strokeLinejoin="round"
-                    strokeLinecap="round"
-                    className="transition-all pointer-events-none"
-                    style={{
-                      opacity:
-                        (selectedLineId && !isLineActive) ||
-                        (editMode === "delete" && !isSelected)
-                          ? 0.2
-                          : 1,
-                    }}
-                  />
-                </g>
-              );
-            })}
+                return group.map((edge, index) => {
+                  const s1 = stations[edge.station1Id];
+                  const s2 = stations[edge.station2Id];
+                  if (!s1 || !s2) return null;
+
+                  const line = lines[edge.lineId];
+                  const isSelected = selectedEdgeId === edge.id;
+                  const isLineActive = selectedLineId === edge.lineId;
+
+                  // Calculate perpendicular offset for parallel lines
+                  const dx = s2.x - s1.x;
+                  const dy = s2.y - s1.y;
+                  const len = Math.sqrt(dx * dx + dy * dy);
+                  if (len === 0) return null;
+
+                  const nx = -dy / len;
+                  const ny = dx / len;
+
+                  const spacing = 12;
+                  const offset = (index - (group.length - 1) / 2) * spacing;
+
+                  const x1 = s1.x + nx * offset;
+                  const y1 = s1.y + ny * offset;
+                  const x2 = s2.x + nx * offset;
+                  const y2 = s2.y + ny * offset;
+
+                  return (
+                    <g key={edge.id} className="edge-group">
+                      <line
+                        x1={x1}
+                        y1={y1}
+                        x2={x2}
+                        y2={y2}
+                        stroke="transparent"
+                        strokeWidth="24"
+                        className="cursor-pointer"
+                        onClick={(e) => handleEdgeClick(e, edge.id)}
+                      />
+                      <line
+                        x1={x1}
+                        y1={y1}
+                        x2={x2}
+                        y2={y2}
+                        stroke={line?.color || "#000"}
+                        strokeWidth={isSelected ? 14 : 10}
+                        strokeLinejoin="round"
+                        strokeLinecap="round"
+                        className="transition-all pointer-events-none"
+                        style={{
+                          opacity:
+                            (selectedLineId && !isLineActive) ||
+                            (editMode === "delete" && !isSelected)
+                              ? 0.2
+                              : 1,
+                        }}
+                      />
+                    </g>
+                  );
+                });
+              });
+            })()}
           </g>
 
           {/* Render Stations */}
