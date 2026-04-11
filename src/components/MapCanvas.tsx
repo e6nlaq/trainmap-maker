@@ -10,7 +10,7 @@ export function MapCanvas() {
   const gRef = useRef<SVGGElement>(null);
   const stationsLayerRef = useRef<SVGGElement>(null);
 
-    const {
+  const {
     stations,
     lines,
     edges,
@@ -32,9 +32,10 @@ export function MapCanvas() {
 
   const stationsArray = Object.values(stations);
   const edgesArray = Object.values(edges);
-  const linesArray = (lineOrder && lineOrder.length > 0) 
-    ? lineOrder.map(id => lines[id]).filter(Boolean)
-    : Object.values(lines);
+  const linesArray =
+    lineOrder && lineOrder.length > 0
+      ? lineOrder.map((id) => lines[id]).filter(Boolean)
+      : Object.values(lines);
 
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
 
@@ -154,7 +155,10 @@ export function MapCanvas() {
   useEffect(() => {
     const handleGlobalKeyDown = (e: KeyboardEvent) => {
       // Don't trigger if user is typing in an input
-      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
+      if (
+        e.target instanceof HTMLInputElement ||
+        e.target instanceof HTMLTextAreaElement
+      ) {
         return;
       }
 
@@ -258,7 +262,9 @@ export function MapCanvas() {
               return Object.entries(edgeGroups).map(([_, rawGroup]) => {
                 // IMPORTANT: Sort the group by the global lineOrder to ensure stable parallel positions
                 const group = [...rawGroup].sort((a, b) => {
-                  return lineOrder.indexOf(a.lineId) - lineOrder.indexOf(b.lineId);
+                  return (
+                    lineOrder.indexOf(a.lineId) - lineOrder.indexOf(b.lineId)
+                  );
                 });
 
                 return group.map((edge, index) => {

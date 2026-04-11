@@ -275,10 +275,11 @@ export const useMapStore = create<MapState>()(
     {
       name: "trainmap-graph-storage",
       version: 1,
+      // biome-ignore lint/suspicious/noExplicitAny: off
       migrate: (persistedState: any, version: number) => {
         if (version === 0) {
           // If migrating from older version without lineOrder, initialize it from lines
-          if (persistedState && persistedState.lines) {
+          if (persistedState?.lines) {
             persistedState.lineOrder = Object.keys(persistedState.lines);
           } else {
             persistedState.lineOrder = [];

@@ -1,4 +1,7 @@
 import {
+  Camera,
+  ChevronDown,
+  ChevronUp,
   Download,
   Eraser,
   ExternalLink,
@@ -11,9 +14,6 @@ import {
   Route,
   Trash2,
   Upload,
-  ChevronUp,
-  ChevronDown,
-  Camera,
 } from "lucide-react";
 import { useRef, useState } from "react";
 import { cn } from "@/lib/utils";
