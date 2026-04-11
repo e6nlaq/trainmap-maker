@@ -1,6 +1,7 @@
 import {
   Download,
   Eraser,
+  ExternalLink,
   Info,
   Link,
   MousePointer2,
@@ -314,10 +315,21 @@ export function EditorSidebar() {
       </ScrollArea>
 
       {/* File Operations (Fixed footer at the bottom) */}
-      <div className="p-4 border-t bg-muted/5 space-y-3">
-        <Label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider px-1">
-          Project Management
-        </Label>
+      <div className="p-4 border-t bg-muted/5 space-y-4">
+        <div className="flex items-center justify-between px-1">
+            <Label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+            Project Management
+            </Label>
+            <a 
+                href="https://github.com/e6nlaq/trainmap-maker#使い方" 
+                target="_blank" 
+                rel="noreferrer"
+                className="text-[10px] text-primary hover:underline flex items-center gap-1 font-bold italic"
+            >
+                HELP / README <ExternalLink className="size-2.5" />
+            </a>
+        </div>
+        
         <div className="grid grid-cols-2 gap-2">
           <Button
             variant="outline"

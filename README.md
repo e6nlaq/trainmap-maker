@@ -1,75 +1,48 @@
-# React + TypeScript + Vite
+# e6nlaq式路線図メーカー (Train Map Maker)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+> [!IMPORTANT]
+> 自分用に全部AIに作らせました。自己責任でご自由にお使いください。
 
-Currently, two official plugins are available:
+美しい路線図をブラウザ上で簡単に作成できるエディタです。
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## 使い方
 
-## React Compiler
+### 1. 駅を追加する
+- キャンバス上の何もない場所を **ダブルクリック** すると、その位置に新しい駅が追加されます。
+- 駅は自動的にグリッド（20px単位）にスナップします。
 
-The React Compiler is enabled on this template. See [this documentation](https://react.dev/learn/react-compiler) for more information.
+### 2. 編集モードを切り替える
+サイドバー上部のボタン、またはショートカットキー（今後実装予定）でモードを切り替えます。
 
-Note: This will impact Vite dev & build performances.
+- **選択 (Select)**:
+    - 駅をクリックして、名前、英語名、ナンバリング（例: `M17`）を編集できます。
+    - 路線をクリックして、路線名や色を変更できます。
+- **接続 (Connect)**:
+    - 2つの駅を順番にクリックすることで、路線（エッジ）を作成します。
+    - 1つ目の駅を選択すると、マウスカーソルを追いかけるガイド線が表示されます。
+    - 2つ目の駅を選択すると接続が完了し、そのまま**連続して次の駅を接続**できます（数珠つなぎ作成）。
+- **移動 (Move)**:
+    - 駅をドラッグして自由に配置を変更できます。
+- **削除 (Delete)**:
+    - 駅または路線をクリックして削除します。駅を削除すると、その駅に繋がっていた路線も自動的に削除されます。
 
-## Expanding the ESLint configuration
+### 3. 路線を管理する
+- サイドバーの「Lines」セクションで「+ Add」を押すと、新しい路線系統を作成できます。
+- 現在選択されている路線が、新しく作成する接続の色になります。
+- 複数の路線が乗り入れる駅は、自動的に四角形のシンボルに変化します。
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### 4. プロジェクトの保存・読み込み
+- サイドバー最下部の「Project Management」から行えます。
+- **エクスポート**: 現在のデータを `.json` ファイルとしてダウンロードします。
+- **インポート**: 保存した `.json` ファイルを読み込んで復元します。
+- **全リセット**: すべてのデータを消去して白紙に戻します。
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## 高度なテクニック
+- **複数ナンバリング**: 駅のナンバリング欄に `M17 C07` のようにスペース区切りで入力すると、ナンバリングアイコンが横に並んで表示されます。
+- **凡例の表示**: サイドバーの「Legend」スイッチで、右下の路線一覧の表示/非表示を切り替えられます。
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
-
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+## 技術スタック
+- **Vite + React + TypeScript**
+- **D3.js**: ズーム・パン、ドラッグ操作の制御
+- **Zustand**: 状態管理（LocalStorageへの自動保存対応）
+- **Tailwind CSS + shadcn/ui**: スタイリング
