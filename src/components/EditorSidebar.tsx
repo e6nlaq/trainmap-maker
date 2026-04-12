@@ -609,7 +609,7 @@ export function EditorSidebar() {
 
           {/* Copyright Notice */}
           <section className="pt-8 pb-4 text-center">
-            <p className="text-[10px] text-muted-foreground/50 font-medium tracking-widest uppercase">
+            <p className="text-[10px] text-muted-foreground/50 font-medium tracking-widest">
               (C) 2026 e6nlaq
             </p>
           </section>
