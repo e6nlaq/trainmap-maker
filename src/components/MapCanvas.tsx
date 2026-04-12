@@ -401,7 +401,9 @@ export function MapCanvas() {
                 .split(/[\s,]+/)
                 .filter(Boolean);
               const numItems = Math.max(1, numberings.length);
-              const stationWidth = 36 + (numItems - 1) * 24;
+              const stSize = station.size || 36;
+              const scale = stSize / 36;
+              const stationWidth = stSize + (numItems - 1) * 24 * scale;
 
               return (
                 <g
@@ -420,11 +422,11 @@ export function MapCanvas() {
                 >
                   {(isSelected || isConnectionStart) && (
                     <rect
-                      x={-(stationWidth + 24) / 2}
-                      y={-30}
-                      width={stationWidth + 24}
-                      height={60}
-                      rx={30}
+                      x={-(stationWidth + 24 * scale) / 2}
+                      y={-(stSize + 24 * scale) / 2}
+                      width={stationWidth + 24 * scale}
+                      height={stSize + 24 * scale}
+                      rx={(stSize + 24 * scale) / 2}
                       fill="hsl(var(--primary))"
                       className={cn(
                         "opacity-20",
@@ -435,10 +437,10 @@ export function MapCanvas() {
 
                   <rect
                     x={-stationWidth / 2}
-                    y={-18}
+                    y={-stSize / 2}
                     width={stationWidth}
-                    height={36}
-                    rx={isMultiLine ? 4 : 18}
+                    height={stSize}
+                    rx={isMultiLine ? 4 * scale : stSize / 2}
                     fill="white"
                     stroke={
                       isSelected
@@ -449,34 +451,35 @@ export function MapCanvas() {
                             ? "#333"
                             : stationColor
                     }
-                    strokeWidth={isSelected ? 5 : 3}
+                    strokeWidth={isSelected ? 5 * scale : 3 * scale}
                     className="transition-all"
                   />
 
-                  <g transform={`translate(${-(numItems - 1) * 12}, 0)`}>
-                    {numberings.map((num) => {
+                  <g transform={`translate(${-(numItems - 1) * 12 * scale}, 0)`}>
+                    {numberings.map((num, i) => {
                       const match = num.match(/^([A-Z]+)(\d+)$/i);
                       const alpha = match ? match[1] : "";
                       const digit = match ? match[2] : num;
+                      const xPos = i * 24 * scale;
                       return (
                         <text
                           key={`${station.id}-${num}`}
-                          x={numberings.indexOf(num) * 24}
+                          x={xPos}
                           textAnchor="middle"
                           className="select-none pointer-events-none font-bold"
                           style={{ fill: "#333" }}
                         >
                           <tspan
-                            x={numberings.indexOf(num) * 24}
-                            y="-2"
-                            style={{ fontSize: "10px" }}
+                            x={xPos}
+                            y={-2 * scale}
+                            style={{ fontSize: `${10 * scale}px` }}
                           >
                             {alpha}
                           </tspan>
                           <tspan
-                            x={numberings.indexOf(num) * 24}
-                            y="10"
-                            style={{ fontSize: "12px" }}
+                            x={xPos}
+                            y={10 * scale}
+                            style={{ fontSize: `${12 * scale}px` }}
                           >
                             {digit}
                           </tspan>
@@ -487,40 +490,42 @@ export function MapCanvas() {
 
                   {isSelected && (
                     <rect
-                      x={-(stationWidth + 12) / 2}
-                      y={-24}
-                      width={stationWidth + 12}
-                      height={48}
-                      rx={24}
+                      x={-(stationWidth + 12 * scale) / 2}
+                      y={- (stSize / 2 + 6 * scale)}
+                      width={stationWidth + 12 * scale}
+                      height={stSize + 12 * scale}
+                      rx={(stSize + 12 * scale) / 2}
                       fill="none"
                       stroke="hsl(var(--primary))"
-                      strokeWidth={2}
-                      strokeDasharray="4 2"
+                      strokeWidth={2 * scale}
+                      strokeDasharray={`${4 * scale} ${2 * scale}`}
                       className="animate-[spin_10s_linear_infinite]"
                       style={{ transformOrigin: "center" }}
                     />
                   )}
 
                   <text
-                    y={32}
+                    y={stSize / 2 + 14 * scale}
                     textAnchor="middle"
-                    className="font-bold text-[13px] fill-[#222] select-none pointer-events-none"
+                    className="font-bold fill-[#222] select-none pointer-events-none"
                     style={{
+                      fontSize: `${13 * scale}px`,
                       paintOrder: "stroke",
                       stroke: "white",
-                      strokeWidth: 3,
+                      strokeWidth: 3 * scale,
                     }}
                   >
                     {station.name}
                   </text>
                   <text
-                    y={44}
+                    y={stSize / 2 + 26 * scale}
                     textAnchor="middle"
-                    className="text-[10px] font-bold fill-[#666] select-none pointer-events-none uppercase tracking-tighter"
+                    className="font-bold fill-[#666] select-none pointer-events-none uppercase tracking-tighter"
                     style={{
+                      fontSize: `${10 * scale}px`,
                       paintOrder: "stroke",
                       stroke: "white",
-                      strokeWidth: 2,
+                      strokeWidth: 2 * scale,
                     }}
                   >
                     {station.nameEn}

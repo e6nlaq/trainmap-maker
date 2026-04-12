@@ -9,7 +9,8 @@ export type Station = {
   numbering: string;
   x: number;
   y: number;
-};
+  size: number;
+}
 
 export type Edge = {
   id: string;
@@ -97,6 +98,7 @@ export const useMapStore = create<MapState>()(
               numbering: "",
               x,
               y,
+              size: 36,
             },
           },
         }));

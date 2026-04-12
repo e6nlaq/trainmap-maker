@@ -320,6 +320,35 @@ export function EditorSidebar() {
                   />
                 </div>
 
+                <div className="grid gap-1.5">
+                  <Label htmlFor="station-size">駅のサイズ</Label>
+                  <div className="flex gap-2">
+                    <Input
+                      id="station-size"
+                      type="number"
+                      min="10"
+                      max="100"
+                      value={selectedStation.size || 36}
+                      onChange={(e) =>
+                        updateStation(selectedStation.id, {
+                          size: parseInt(e.target.value, 10) || 36,
+                        })
+                      }
+                    />
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="shrink-0"
+                      onClick={() =>
+                        updateStation(selectedStation.id, { size: 36 })
+                      }
+                      title="リセット"
+                    >
+                      <RotateCcw className="size-3" />
+                    </Button>
+                  </div>
+                </div>
+
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
                     <Button variant="destructive" size="sm" className="w-full">
