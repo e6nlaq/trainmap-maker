@@ -68,6 +68,8 @@ export function EditorSidebar() {
     toggleStationGradients,
     autoNumbering,
     toggleAutoNumbering,
+    sortNumbering,
+    toggleSortNumbering,
     resetMap,
     importData,
   } = useMapStore();
@@ -458,6 +460,24 @@ export function EditorSidebar() {
                           id="dialog-autonum-toggle"
                           checked={autoNumbering}
                           onCheckedChange={toggleAutoNumbering}
+                        />
+                      </div>
+                      <div className="flex items-center justify-between gap-4">
+                        <div className="space-y-0.5">
+                          <Label
+                            htmlFor="dialog-sort-toggle"
+                            className="text-sm font-semibold"
+                          >
+                            ナンバリングをソート
+                          </Label>
+                          <p className="text-[11px] text-muted-foreground">
+                            駅ナンバリングをアルファベット順に並べ替えます。
+                          </p>
+                        </div>
+                        <Switch
+                          id="dialog-sort-toggle"
+                          checked={sortNumbering}
+                          onCheckedChange={toggleSortNumbering}
                         />
                       </div>
                     </div>

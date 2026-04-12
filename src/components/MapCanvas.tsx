@@ -29,6 +29,7 @@ export function MapCanvas() {
     setConnectionStart,
     showLegend,
     useStationGradients,
+    sortNumbering,
   } = useMapStore();
 
   const stationsArray = Object.values(stations);
@@ -397,9 +398,12 @@ export function MapCanvas() {
               const isSelected = selectedStationId === station.id;
               const isConnectionStart = connectionStartId === station.id;
 
-              const numberings = station.numbering
+              const rawNumberings = station.numbering
                 .split(/[\s,]+/)
                 .filter(Boolean);
+              const numberings = sortNumbering
+                ? [...rawNumberings].sort()
+                : rawNumberings;
               const numItems = Math.max(1, numberings.length);
               const stSize = station.size || 36;
               const scale = stSize / 36;

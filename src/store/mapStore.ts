@@ -37,6 +37,7 @@ type MapState = {
   showLegend: boolean;
   useStationGradients: boolean;
   autoNumbering: boolean;
+  sortNumbering: boolean;
   lineOrder: string[];
 
   addStation: (x: number, y: number) => string;
@@ -59,6 +60,7 @@ type MapState = {
   toggleLegend: () => void;
   toggleStationGradients: () => void;
   toggleAutoNumbering: () => void;
+  toggleSortNumbering: () => void;
   resetMap: () => void;
   importData: (data: {
     stations: Record<string, Station>;
@@ -67,6 +69,7 @@ type MapState = {
     lineOrder?: string[];
     useStationGradients?: boolean;
     autoNumbering?: boolean;
+    sortNumbering?: boolean;
   }) => void;
 };
 
@@ -84,6 +87,7 @@ export const useMapStore = create<MapState>()(
       showLegend: true,
       useStationGradients: true,
       autoNumbering: true,
+      sortNumbering: true,
       lineOrder: [],
 
       addStation: (x, y) => {
@@ -305,6 +309,8 @@ export const useMapStore = create<MapState>()(
         set((state) => ({ useStationGradients: !state.useStationGradients })),
       toggleAutoNumbering: () =>
         set((state) => ({ autoNumbering: !state.autoNumbering })),
+      toggleSortNumbering: () =>
+        set((state) => ({ sortNumbering: !state.sortNumbering })),
 
       resetMap: () =>
         set({
@@ -318,6 +324,7 @@ export const useMapStore = create<MapState>()(
           connectionStartId: null,
           useStationGradients: true,
           autoNumbering: true,
+          sortNumbering: true,
         }),
 
       importData: (data) =>
@@ -328,6 +335,7 @@ export const useMapStore = create<MapState>()(
           lineOrder: data.lineOrder || Object.keys(data.lines || {}),
           useStationGradients: data.useStationGradients ?? true,
           autoNumbering: data.autoNumbering ?? true,
+          sortNumbering: data.sortNumbering ?? true,
           selectedStationId: null,
           selectedLineId: null,
           selectedEdgeId: null,
