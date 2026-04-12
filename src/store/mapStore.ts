@@ -47,10 +47,10 @@ type MapState = {
   removeLine: (id: string) => void;
   reorderLines: (startIndex: number, endIndex: number) => void;
 
-  addEdge: (s1: string, s2: string, lineId: string) => string | null;
+  addEdge: (s1: string, s2: string, lineId: string, isShiftPressed?: boolean) => string | null;
   removeEdge: (id: string) => void;
 
-  selectStation: (id: string | null) => void;
+  selectStation: (id: string | null, isShiftPressed?: boolean) => void;
   selectLine: (id: string | null) => void;
   selectEdge: (id: string | null) => void;
   setEditMode: (mode: "select" | "connect" | "move" | "delete") => void;
@@ -193,7 +193,7 @@ export const useMapStore = create<MapState>()(
         });
       },
 
-      addEdge: (s1, s2, lineId) => {
+      addEdge: (s1, s2, lineId, isShiftPressed) => {
         if (s1 === s2) return null;
 
         // Check if edge already exists for this line
@@ -222,13 +222,14 @@ export const useMapStore = create<MapState>()(
               if (match) {
                 const prefix = match[1];
                 const num = parseInt(match[2], 10);
+                const nextNum = isShiftPressed ? num - 1 : num + 1;
 
                 // Check if s2 already has this prefix
                 const hasPrefix = s2Numbers.some((n2) => n2.startsWith(prefix));
-                if (!hasPrefix) {
+                if (!hasPrefix && nextNum >= 1) {
                   const newNumbers = [...s2Numbers];
                   newNumbers.push(
-                    `${prefix}${String(num + 1).padStart(2, "0")}`,
+                    `${prefix}${String(nextNum).padStart(2, "0")}`,
                   );
                   updatedS2 = { ...st2, numbering: newNumbers.join(" ") };
                 }
@@ -267,13 +268,18 @@ export const useMapStore = create<MapState>()(
         });
       },
 
-      selectStation: (id) => {
+      selectStation: (id, isShiftPressed) => {
         const state = get();
 
         if (state.editMode === "connect" && state.selectedLineId && id) {
           if (state.connectionStartId && state.connectionStartId !== id) {
             // Connect and then set 'id' as the new start (chaining)
-            state.addEdge(state.connectionStartId, id, state.selectedLineId);
+            state.addEdge(
+              state.connectionStartId,
+              id,
+              state.selectedLineId,
+              isShiftPressed,
+            );
           } else {
             // Set first station
             state.setConnectionStart(id);
