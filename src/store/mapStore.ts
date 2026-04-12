@@ -35,6 +35,7 @@ type MapState = {
   connectionStartId: string | null;
   showLegend: boolean;
   useStationGradients: boolean;
+  autoNumbering: boolean;
   lineOrder: string[];
 
   addStation: (x: number, y: number) => string;
@@ -56,6 +57,7 @@ type MapState = {
   setConnectionStart: (id: string | null) => void;
   toggleLegend: () => void;
   toggleStationGradients: () => void;
+  toggleAutoNumbering: () => void;
   resetMap: () => void;
   importData: (data: {
     stations: Record<string, Station>;
@@ -63,6 +65,7 @@ type MapState = {
     edges: Record<string, Edge>;
     lineOrder?: string[];
     useStationGradients?: boolean;
+    autoNumbering?: boolean;
   }) => void;
 };
 
@@ -79,6 +82,7 @@ export const useMapStore = create<MapState>()(
       connectionStartId: null,
       showLegend: true,
       useStationGradients: true,
+      autoNumbering: true,
       lineOrder: [],
 
       addStation: (x, y) => {
@@ -202,14 +206,52 @@ export const useMapStore = create<MapState>()(
         if (exists) return null;
 
         const id = nanoid();
-        set((state) => ({
-          edges: {
-            ...state.edges,
-            [id]: { id, station1Id: s1, station2Id: s2, lineId },
-          },
-          // Chain connection by making the second station the new start
-          connectionStartId: s2,
-        }));
+        set((state) => {
+          const st1 = state.stations[s1];
+          const st2 = state.stations[s2];
+
+          // Auto-numbering logic
+          let updatedS2 = st2;
+          if (state.autoNumbering && st1 && st2) {
+            const s1Numbers = st1.numbering.split(/[\s,]+/).filter(Boolean);
+            const s2Numbers = st2.numbering.split(/[\s,]+/).filter(Boolean);
+
+            const lastN1 = s1Numbers[s1Numbers.length - 1];
+            if (lastN1) {
+              const match = lastN1.match(/^([A-Z]+)(\d+)$/i);
+              if (match) {
+                const prefix = match[1];
+                const num = parseInt(match[2], 10);
+
+                // Check if s2 already has this prefix
+                const hasPrefix = s2Numbers.some((n2) => n2.startsWith(prefix));
+                if (!hasPrefix) {
+                  const newNumbers = [...s2Numbers];
+                  newNumbers.push(
+                    `${prefix}${String(num + 1).padStart(2, "0")}`,
+                  );
+                  updatedS2 = { ...st2, numbering: newNumbers.join(" ") };
+                }
+              }
+            }
+          }
+
+          return {
+            edges: {
+              ...state.edges,
+              [id]: { id, station1Id: s1, station2Id: s2, lineId },
+            },
+            stations:
+              updatedS2 !== st2
+                ? {
+                    ...state.stations,
+                    [s2]: updatedS2,
+                  }
+                : state.stations,
+            // Chain connection by making the second station the new start
+            connectionStartId: s2,
+          };
+        });
         return id;
       },
 
@@ -253,6 +295,8 @@ export const useMapStore = create<MapState>()(
       toggleLegend: () => set((state) => ({ showLegend: !state.showLegend })),
       toggleStationGradients: () =>
         set((state) => ({ useStationGradients: !state.useStationGradients })),
+      toggleAutoNumbering: () =>
+        set((state) => ({ autoNumbering: !state.autoNumbering })),
 
       resetMap: () =>
         set({
@@ -265,6 +309,7 @@ export const useMapStore = create<MapState>()(
           selectedEdgeId: null,
           connectionStartId: null,
           useStationGradients: true,
+          autoNumbering: true,
         }),
 
       importData: (data) =>
@@ -274,6 +319,7 @@ export const useMapStore = create<MapState>()(
           edges: data.edges || {},
           lineOrder: data.lineOrder || Object.keys(data.lines || {}),
           useStationGradients: data.useStationGradients ?? true,
+          autoNumbering: data.autoNumbering ?? true,
           selectedStationId: null,
           selectedLineId: null,
           selectedEdgeId: null,

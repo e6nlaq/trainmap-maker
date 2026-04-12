@@ -66,6 +66,8 @@ export function EditorSidebar() {
     toggleLegend,
     useStationGradients,
     toggleStationGradients,
+    autoNumbering,
+    toggleAutoNumbering,
     resetMap,
     importData,
   } = useMapStore();
@@ -369,9 +371,9 @@ export function EditorSidebar() {
                   </DialogTrigger>
                   <DialogContent className="sm:max-w-[320px]">
                     <DialogHeader>
-                      <DialogTitle>表示設定</DialogTitle>
+                      <DialogTitle>各種設定</DialogTitle>
                       <DialogDescription>
-                        路線図の見た目に関する詳細設定を行えます。
+                        路線図の見た目や編集に関する設定を行えます。
                       </DialogDescription>
                     </DialogHeader>
                     <div className="py-6 space-y-6">
@@ -409,6 +411,24 @@ export function EditorSidebar() {
                           id="dialog-gradient-toggle"
                           checked={useStationGradients}
                           onCheckedChange={toggleStationGradients}
+                        />
+                      </div>
+                      <div className="flex items-center justify-between gap-4 border-t pt-6">
+                        <div className="space-y-0.5">
+                          <Label
+                            htmlFor="dialog-autonum-toggle"
+                            className="text-sm font-semibold"
+                          >
+                            自動ナンバリング
+                          </Label>
+                          <p className="text-[11px] text-muted-foreground">
+                            接続時に前駅の番号を+1して自動入力します。
+                          </p>
+                        </div>
+                        <Switch
+                          id="dialog-autonum-toggle"
+                          checked={autoNumbering}
+                          onCheckedChange={toggleAutoNumbering}
                         />
                       </div>
                     </div>
