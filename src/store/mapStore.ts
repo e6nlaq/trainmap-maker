@@ -34,6 +34,7 @@ type MapState = {
   editMode: "select" | "connect" | "move" | "delete";
   connectionStartId: string | null;
   showLegend: boolean;
+  useStationGradients: boolean;
   lineOrder: string[];
 
   addStation: (x: number, y: number) => string;
@@ -54,12 +55,14 @@ type MapState = {
   setEditMode: (mode: "select" | "connect" | "move" | "delete") => void;
   setConnectionStart: (id: string | null) => void;
   toggleLegend: () => void;
+  toggleStationGradients: () => void;
   resetMap: () => void;
   importData: (data: {
     stations: Record<string, Station>;
     lines: Record<string, Line>;
     edges: Record<string, Edge>;
     lineOrder?: string[];
+    useStationGradients?: boolean;
   }) => void;
 };
 
@@ -75,6 +78,7 @@ export const useMapStore = create<MapState>()(
       editMode: "select",
       connectionStartId: null,
       showLegend: true,
+      useStationGradients: true,
       lineOrder: [],
 
       addStation: (x, y) => {
@@ -247,6 +251,8 @@ export const useMapStore = create<MapState>()(
       setEditMode: (mode) => set({ editMode: mode, connectionStartId: null }),
       setConnectionStart: (id) => set({ connectionStartId: id }),
       toggleLegend: () => set((state) => ({ showLegend: !state.showLegend })),
+      toggleStationGradients: () =>
+        set((state) => ({ useStationGradients: !state.useStationGradients })),
 
       resetMap: () =>
         set({
@@ -258,6 +264,7 @@ export const useMapStore = create<MapState>()(
           selectedLineId: null,
           selectedEdgeId: null,
           connectionStartId: null,
+          useStationGradients: true,
         }),
 
       importData: (data) =>
@@ -266,6 +273,7 @@ export const useMapStore = create<MapState>()(
           lines: data.lines || {},
           edges: data.edges || {},
           lineOrder: data.lineOrder || Object.keys(data.lines || {}),
+          useStationGradients: data.useStationGradients ?? true,
           selectedStationId: null,
           selectedLineId: null,
           selectedEdgeId: null,

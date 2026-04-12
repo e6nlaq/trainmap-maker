@@ -12,6 +12,7 @@ import {
   Plus,
   RotateCcw,
   Route,
+  Settings as SettingsIcon,
   Trash2,
   Upload,
 } from "lucide-react";
@@ -30,6 +31,14 @@ import {
   AlertDialogTrigger,
 } from "./ui/alert-dialog";
 import { Button } from "./ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "./ui/dialog";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { ScrollArea } from "./ui/scroll-area";
@@ -55,6 +64,8 @@ export function EditorSidebar() {
     edges,
     showLegend,
     toggleLegend,
+    useStationGradients,
+    toggleStationGradients,
     resetMap,
     importData,
   } = useMapStore();
@@ -344,26 +355,71 @@ export function EditorSidebar() {
                 <Route className="size-3" />
                 路線
               </h3>
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-2">
-                  <Label
-                    htmlFor="legend-toggle"
-                    className="text-[10px] font-bold uppercase text-muted-foreground/60"
-                  >
-                    凡例
-                  </Label>
-                  <Switch
-                    id="legend-toggle"
-                    checked={showLegend}
-                    onCheckedChange={toggleLegend}
-                    className="scale-75 origin-right"
-                  />
-                </div>
+              <div className="flex items-center gap-2">
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                      title="表示設定"
+                    >
+                      <SettingsIcon className="size-4" />
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-[320px]">
+                    <DialogHeader>
+                      <DialogTitle>表示設定</DialogTitle>
+                      <DialogDescription>
+                        路線図の見た目に関する詳細設定を行えます。
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="py-6 space-y-6">
+                      <div className="flex items-center justify-between gap-4">
+                        <div className="space-y-0.5">
+                          <Label
+                            htmlFor="dialog-legend-toggle"
+                            className="text-sm font-semibold"
+                          >
+                            凡例を表示
+                          </Label>
+                          <p className="text-[11px] text-muted-foreground">
+                            画面右下に路線の凡例を表示します。
+                          </p>
+                        </div>
+                        <Switch
+                          id="dialog-legend-toggle"
+                          checked={showLegend}
+                          onCheckedChange={toggleLegend}
+                        />
+                      </div>
+                      <div className="flex items-center justify-between gap-4">
+                        <div className="space-y-0.5">
+                          <Label
+                            htmlFor="dialog-gradient-toggle"
+                            className="text-sm font-semibold"
+                          >
+                            ターミナル駅のグラデ
+                          </Label>
+                          <p className="text-[11px] text-muted-foreground">
+                            複数路線が通る駅の枠線をカラフルにします。
+                          </p>
+                        </div>
+                        <Switch
+                          id="dialog-gradient-toggle"
+                          checked={useStationGradients}
+                          onCheckedChange={toggleStationGradients}
+                        />
+                      </div>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={handleAddLine}
-                  className="h-8 shadow-sm"
+                  className="h-8 shadow-sm px-3"
                 >
                   <Plus className="size-3 mr-1" />
                   追加
@@ -503,9 +559,9 @@ export function EditorSidebar() {
           </section>
 
           {/* Copyright Notice */}
-          <section className="pt-8 text-center">
-            <p className="text-[10px] text-muted-foreground/50 font-medium tracking-widest">
-              (C) 2026 e6nlaq
+          <section className="pt-8 pb-4 text-center">
+            <p className="text-[10px] text-muted-foreground/50 font-medium tracking-widest uppercase">
+              © 2025 e6nlaq
             </p>
           </section>
         </div>

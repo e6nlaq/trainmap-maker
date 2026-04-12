@@ -28,6 +28,7 @@ export function MapCanvas() {
     connectionStartId,
     setConnectionStart,
     showLegend,
+    useStationGradients,
   } = useMapStore();
 
   const stationsArray = Object.values(stations);
@@ -216,6 +217,48 @@ export function MapCanvas() {
           >
             <circle cx="1" cy="1" r="1" fill="#e5e5e5" />
           </pattern>
+
+          {/* Dynamic Gradients for Multi-line Stations */}
+          {useStationGradients &&
+            stationsArray.map((station) => {
+              const linesAtStation = [
+                ...new Set(
+                  edgesArray
+                    .filter(
+                      (e) =>
+                        e.station1Id === station.id ||
+                        e.station2Id === station.id,
+                    )
+                    .map((e) => e.lineId),
+                ),
+              ]
+                .map((id) => lines[id])
+                .filter(Boolean);
+
+              if (linesAtStation.length <= 1) return null;
+
+              return (
+                <linearGradient
+                  key={`grad-${station.id}`}
+                  id={`grad-station-${station.id}`}
+                  x1="0%"
+                  y1="0%"
+                  x2="100%"
+                  y2="100%"
+                >
+                  {linesAtStation.map((line, i) => {
+                    const offset = (i / (linesAtStation.length - 1)) * 100;
+                    return (
+                      <stop
+                        key={line.id}
+                        offset={`${offset}%`}
+                        stopColor={line.color}
+                      />
+                    );
+                  })}
+                </linearGradient>
+              );
+            })}
         </defs>
 
         {/* Background Grid */}
@@ -345,6 +388,8 @@ export function MapCanvas() {
                 ),
               ];
               const primaryLineId = belongingLineIds[0];
+              const isMultiLine = belongingLineIds.length > 1;
+
               const stationColor = primaryLineId
                 ? lines[primaryLineId]?.color || "#333"
                 : "#ccc";
@@ -393,14 +438,16 @@ export function MapCanvas() {
                     y={-18}
                     width={stationWidth}
                     height={36}
-                    rx={belongingLineIds.length > 1 ? 4 : 18}
+                    rx={isMultiLine ? 4 : 18}
                     fill="white"
                     stroke={
                       isSelected
                         ? "hsl(var(--primary))"
-                        : belongingLineIds.length > 1
-                          ? "#333"
-                          : stationColor
+                        : isMultiLine && useStationGradients
+                          ? `url(#grad-station-${station.id})`
+                          : isMultiLine
+                            ? "#333"
+                            : stationColor
                     }
                     strokeWidth={isSelected ? 5 : 3}
                     className="transition-all"
