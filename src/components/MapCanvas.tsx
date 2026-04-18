@@ -1,5 +1,5 @@
 import * as d3 from "d3";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
 import { cn } from "@/lib/utils";
 import { useMapStore } from "@/store/mapStore";
 
@@ -32,12 +32,40 @@ export function MapCanvas() {
     sortNumbering,
   } = useMapStore();
 
-  const stationsArray = Object.values(stations);
-  const edgesArray = Object.values(edges);
-  const linesArray =
-    lineOrder && lineOrder.length > 0
+  const stationsArray = useMemo(() => Object.values(stations), [stations]);
+  const edgesArray = useMemo(() => Object.values(edges), [edges]);
+  const linesArray = useMemo(() => {
+    return lineOrder && lineOrder.length > 0
       ? lineOrder.map((id) => lines[id]).filter(Boolean)
       : Object.values(lines);
+  }, [lines, lineOrder]);
+
+  // Memoize edge grouping for parallel lines
+  const edgeGroups = useMemo(() => {
+    const groups: Record<string, typeof edgesArray> = {};
+    for (const edge of edgesArray) {
+      const pairId = [edge.station1Id, edge.station2Id].sort().join("-");
+      if (!groups[pairId]) groups[pairId] = [];
+      groups[pairId].push(edge);
+    }
+    return groups;
+  }, [edgesArray]);
+
+  // Pre-calculate which lines pass through each station (for gradients)
+  const stationLineIdsMap = useMemo(() => {
+    const map: Record<string, string[]> = {};
+    for (const edge of edgesArray) {
+      if (!map[edge.station1Id]) map[edge.station1Id] = [];
+      if (!map[edge.station2Id]) map[edge.station2Id] = [];
+      map[edge.station1Id].push(edge.lineId);
+      map[edge.station2Id].push(edge.lineId);
+    }
+    // De-duplicate
+    for (const id in map) {
+      map[id] = [...new Set(map[id])];
+    }
+    return map;
+  }, [edgesArray]);
 
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
 
@@ -223,17 +251,8 @@ export function MapCanvas() {
           {/* Dynamic Gradients for Multi-line Stations */}
           {useStationGradients &&
             stationsArray.map((station) => {
-              const linesAtStation = [
-                ...new Set(
-                  edgesArray
-                    .filter(
-                      (e) =>
-                        e.station1Id === station.id ||
-                        e.station2Id === station.id,
-                    )
-                    .map((e) => e.lineId),
-                ),
-              ]
+              const lineIds = stationLineIdsMap[station.id] || [];
+              const linesAtStation = lineIds
                 .map((id) => lines[id])
                 .filter(Boolean);
 
@@ -293,18 +312,7 @@ export function MapCanvas() {
 
           {/* Render Edges */}
           <g className="edges-layer">
-            {(() => {
-              // Group edges by station pair (undirected) to handle parallel lines
-              const edgeGroups: Record<string, typeof edgesArray> = {};
-              for (const edge of edgesArray) {
-                const pairId = [edge.station1Id, edge.station2Id]
-                  .sort()
-                  .join("-");
-                if (!edgeGroups[pairId]) edgeGroups[pairId] = [];
-                edgeGroups[pairId].push(edge);
-              }
-
-              return Object.entries(edgeGroups).map(([_, rawGroup]) => {
+            {Object.entries(edgeGroups).map(([_, rawGroup]) => {
                 // IMPORTANT: Sort the group by the global lineOrder to ensure stable parallel positions
                 const group = [...rawGroup].sort((a, b) => {
                   return (
@@ -377,8 +385,7 @@ export function MapCanvas() {
                     </g>
                   );
                 });
-              });
-            })()}
+              })}
           </g>
 
           {/* Render Stations */}
