@@ -91,6 +91,7 @@ export function MapCanvas() {
   }, [addStation]);
 
   // Setup Dragging
+  // biome-ignore lint/correctness/useExhaustiveDependencies: off
   useEffect(() => {
     if (!stationsLayerRef.current) return;
 
@@ -123,7 +124,7 @@ export function MapCanvas() {
       });
 
     stationsLayer.selectAll<SVGGElement, unknown>(".station-group").call(drag);
-  }, [editMode, updateStation]);
+  }, [editMode, updateStation, stationsArray.length]);
 
   const handleStationClick = (e: React.MouseEvent, id: string) => {
     e.stopPropagation();
@@ -317,9 +318,10 @@ export function MapCanvas() {
                   if (!s1Raw || !s2Raw) return null;
 
                   // Normalize direction for consistent offsets regardless of edge direction
-                  const [s1, s2] = edge.station1Id < edge.station2Id 
-                    ? [s1Raw, s2Raw] 
-                    : [s2Raw, s1Raw];
+                  const [s1, s2] =
+                    edge.station1Id < edge.station2Id
+                      ? [s1Raw, s2Raw]
+                      : [s2Raw, s1Raw];
 
                   const line = lines[edge.lineId];
                   const isSelected = selectedEdgeId === edge.id;
@@ -464,7 +466,9 @@ export function MapCanvas() {
                     className="transition-all"
                   />
 
-                  <g transform={`translate(${-(numItems - 1) * 12 * scale}, 0)`}>
+                  <g
+                    transform={`translate(${-(numItems - 1) * 12 * scale}, 0)`}
+                  >
                     {numberings.map((num, i) => {
                       const match = num.match(/^([A-Z]+)(\d+)$/i);
                       const alpha = match ? match[1] : "";
@@ -500,7 +504,7 @@ export function MapCanvas() {
                   {isSelected && (
                     <rect
                       x={-(stationWidth + 12 * scale) / 2}
-                      y={- (stSize / 2 + 6 * scale)}
+                      y={-(stSize / 2 + 6 * scale)}
                       width={stationWidth + 12 * scale}
                       height={stSize + 12 * scale}
                       rx={(stSize + 12 * scale) / 2}
