@@ -325,11 +325,10 @@ export function MapCanvas() {
                 const s2Raw = stations[edge.station2Id];
                 if (!s1Raw || !s2Raw) return null;
 
-                // Normalize direction for consistent offsets regardless of edge direction
-                const [s1, s2] =
-                  edge.station1Id < edge.station2Id
-                    ? [s1Raw, s2Raw]
-                    : [s2Raw, s1Raw];
+                // Normalize direction geometrically (always left-to-right, then top-to-bottom)
+                // for consistent offsets regardless of connection order or ID
+                const isS1First = s1Raw.x < s2Raw.x || (s1Raw.x === s2Raw.x && s1Raw.y < s2Raw.y);
+                const [s1, s2] = isS1First ? [s1Raw, s2Raw] : [s2Raw, s1Raw];
 
                 const line = lines[edge.lineId];
                 const isSelected = selectedEdgeId === edge.id;
