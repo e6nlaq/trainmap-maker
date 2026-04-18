@@ -1,6 +1,6 @@
 # e6nlaq式路線図メーカー (Train Map Maker)
 
-<img width="2553" height="1410" alt="image" src="https://github.com/user-attachments/assets/e6039001-5b56-46a1-a1e5-8009af67bfc3" />
+<img alt="image" src="https://github.com/user-attachments/assets/e6039001-5b56-46a1-a1e5-8009af67bfc3" />
 
 
 
