@@ -10,7 +10,7 @@ export type Station = {
   x: number;
   y: number;
   size: number;
-}
+};
 
 export type Edge = {
   id: string;
@@ -49,7 +49,12 @@ type MapState = {
   removeLine: (id: string) => void;
   reorderLines: (startIndex: number, endIndex: number) => void;
 
-  addEdge: (s1: string, s2: string, lineId: string, isShiftPressed?: boolean) => string | null;
+  addEdge: (
+    s1: string,
+    s2: string,
+    lineId: string,
+    isShiftPressed?: boolean,
+  ) => string | null;
   removeEdge: (id: string) => void;
 
   selectStation: (id: string | null, isShiftPressed?: boolean) => void;

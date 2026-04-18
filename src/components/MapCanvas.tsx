@@ -1,5 +1,5 @@
 import * as d3 from "d3";
-import { useEffect, useRef, useState, useMemo } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import { useMapStore } from "@/store/mapStore";
 
@@ -313,79 +313,79 @@ export function MapCanvas() {
           {/* Render Edges */}
           <g className="edges-layer">
             {Object.entries(edgeGroups).map(([_, rawGroup]) => {
-                // IMPORTANT: Sort the group by the global lineOrder to ensure stable parallel positions
-                const group = [...rawGroup].sort((a, b) => {
-                  return (
-                    lineOrder.indexOf(a.lineId) - lineOrder.indexOf(b.lineId)
-                  );
-                });
+              // IMPORTANT: Sort the group by the global lineOrder to ensure stable parallel positions
+              const group = [...rawGroup].sort((a, b) => {
+                return (
+                  lineOrder.indexOf(a.lineId) - lineOrder.indexOf(b.lineId)
+                );
+              });
 
-                return group.map((edge, index) => {
-                  const s1Raw = stations[edge.station1Id];
-                  const s2Raw = stations[edge.station2Id];
-                  if (!s1Raw || !s2Raw) return null;
+              return group.map((edge, index) => {
+                const s1Raw = stations[edge.station1Id];
+                const s2Raw = stations[edge.station2Id];
+                if (!s1Raw || !s2Raw) return null;
 
-                  // Normalize direction for consistent offsets regardless of edge direction
-                  const [s1, s2] =
-                    edge.station1Id < edge.station2Id
-                      ? [s1Raw, s2Raw]
-                      : [s2Raw, s1Raw];
+                // Normalize direction for consistent offsets regardless of edge direction
+                const [s1, s2] =
+                  edge.station1Id < edge.station2Id
+                    ? [s1Raw, s2Raw]
+                    : [s2Raw, s1Raw];
 
-                  const line = lines[edge.lineId];
-                  const isSelected = selectedEdgeId === edge.id;
-                  const isLineActive = selectedLineId === edge.lineId;
+                const line = lines[edge.lineId];
+                const isSelected = selectedEdgeId === edge.id;
+                const isLineActive = selectedLineId === edge.lineId;
 
-                  // Calculate perpendicular offset for parallel lines
-                  const dx = s2.x - s1.x;
-                  const dy = s2.y - s1.y;
-                  const len = Math.sqrt(dx * dx + dy * dy);
-                  if (len === 0) return null;
+                // Calculate perpendicular offset for parallel lines
+                const dx = s2.x - s1.x;
+                const dy = s2.y - s1.y;
+                const len = Math.sqrt(dx * dx + dy * dy);
+                if (len === 0) return null;
 
-                  const nx = -dy / len;
-                  const ny = dx / len;
+                const nx = -dy / len;
+                const ny = dx / len;
 
-                  const spacing = 12;
-                  const offset = (index - (group.length - 1) / 2) * spacing;
+                const spacing = 12;
+                const offset = (index - (group.length - 1) / 2) * spacing;
 
-                  const x1 = s1.x + nx * offset;
-                  const y1 = s1.y + ny * offset;
-                  const x2 = s2.x + nx * offset;
-                  const y2 = s2.y + ny * offset;
+                const x1 = s1.x + nx * offset;
+                const y1 = s1.y + ny * offset;
+                const x2 = s2.x + nx * offset;
+                const y2 = s2.y + ny * offset;
 
-                  return (
-                    <g key={edge.id} className="edge-group">
-                      <line
-                        x1={x1}
-                        y1={y1}
-                        x2={x2}
-                        y2={y2}
-                        stroke="transparent"
-                        strokeWidth="24"
-                        className="cursor-pointer"
-                        onClick={(e) => handleEdgeClick(e, edge.id)}
-                      />
-                      <line
-                        x1={x1}
-                        y1={y1}
-                        x2={x2}
-                        y2={y2}
-                        stroke={line?.color || "#000"}
-                        strokeWidth={isSelected ? 14 : 10}
-                        strokeLinejoin="round"
-                        strokeLinecap="round"
-                        className="transition-all pointer-events-none"
-                        style={{
-                          opacity:
-                            (selectedLineId && !isLineActive) ||
-                            (editMode === "delete" && !isSelected)
-                              ? 0.2
-                              : 1,
-                        }}
-                      />
-                    </g>
-                  );
-                });
-              })}
+                return (
+                  <g key={edge.id} className="edge-group">
+                    <line
+                      x1={x1}
+                      y1={y1}
+                      x2={x2}
+                      y2={y2}
+                      stroke="transparent"
+                      strokeWidth="24"
+                      className="cursor-pointer"
+                      onClick={(e) => handleEdgeClick(e, edge.id)}
+                    />
+                    <line
+                      x1={x1}
+                      y1={y1}
+                      x2={x2}
+                      y2={y2}
+                      stroke={line?.color || "#000"}
+                      strokeWidth={isSelected ? 14 : 10}
+                      strokeLinejoin="round"
+                      strokeLinecap="round"
+                      className="transition-all pointer-events-none"
+                      style={{
+                        opacity:
+                          (selectedLineId && !isLineActive) ||
+                          (editMode === "delete" && !isSelected)
+                            ? 0.2
+                            : 1,
+                      }}
+                    />
+                  </g>
+                );
+              });
+            })}
           </g>
 
           {/* Render Stations */}
