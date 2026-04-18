@@ -113,7 +113,7 @@ export function EditorSidebar() {
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = `trainmap-${new Date().toISOString().slice(0, 10)}.json`;
+    link.download = `trainmap-${new Date().toISOString()}.etm`;
     link.click();
     URL.revokeObjectURL(url);
   };
@@ -748,7 +748,7 @@ export function EditorSidebar() {
               type="file"
               ref={fileInputRef}
               className="hidden"
-              accept=".json"
+              accept=".etm"
               onChange={handleFileChange}
             />
 
