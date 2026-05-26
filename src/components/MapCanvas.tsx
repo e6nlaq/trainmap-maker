@@ -156,7 +156,7 @@ export function MapCanvas() {
 
   const handleStationClick = (e: React.MouseEvent, id: string) => {
     e.stopPropagation();
-    selectStation(id, e.shiftKey);
+    selectStation(id, e.shiftKey, e.ctrlKey || e.metaKey);
   };
 
   const handleEdgeClick = (e: React.MouseEvent, id: string) => {

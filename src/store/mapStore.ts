@@ -55,10 +55,15 @@ type MapState = {
     s2: string,
     lineId: string,
     isShiftPressed?: boolean,
+    isCtrlPressed?: boolean,
   ) => string | null;
   removeEdge: (id: string) => void;
 
-  selectStation: (id: string | null, isShiftPressed?: boolean) => void;
+  selectStation: (
+    id: string | null,
+    isShiftPressed?: boolean,
+    isCtrlPressed?: boolean,
+  ) => void;
   selectLine: (id: string | null) => void;
   selectEdge: (id: string | null) => void;
   setEditMode: (mode: "select" | "connect" | "move" | "delete") => void;
@@ -206,7 +211,7 @@ export const useMapStore = create<MapState>()(
         });
       },
 
-      addEdge: (s1, s2, lineId, isShiftPressed) => {
+      addEdge: (s1, s2, lineId, isShiftPressed, isCtrlPressed) => {
         if (s1 === s2) return null;
 
         // Check if edge already exists for this line
@@ -225,7 +230,7 @@ export const useMapStore = create<MapState>()(
 
           // Auto-numbering logic
           let updatedS2 = st2;
-          if (state.autoNumbering && st1 && st2) {
+          if (state.autoNumbering && st1 && st2 && !isCtrlPressed) {
             const s1Numbers = st1.numbering.split(/[\s,]+/).filter(Boolean);
             const s2Numbers = st2.numbering.split(/[\s,]+/).filter(Boolean);
 
@@ -281,7 +286,7 @@ export const useMapStore = create<MapState>()(
         });
       },
 
-      selectStation: (id, isShiftPressed) => {
+      selectStation: (id, isShiftPressed, isCtrlPressed) => {
         const state = get();
 
         if (state.editMode === "connect" && state.selectedLineId && id) {
@@ -292,6 +297,7 @@ export const useMapStore = create<MapState>()(
               id,
               state.selectedLineId,
               isShiftPressed,
+              isCtrlPressed,
             );
           } else {
             // Set first station
