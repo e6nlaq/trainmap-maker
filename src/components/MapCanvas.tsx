@@ -252,7 +252,9 @@ export function MapCanvas() {
           {useStationGradients &&
             stationsArray.map((station) => {
               const lineIds = stationLineIdsMap[station.id] || [];
+              const disabledLines = station.disabledLines || [];
               const linesAtStation = lineIds
+                .filter((id) => !disabledLines.includes(id))
                 .map((id) => lines[id])
                 .filter(Boolean);
 
@@ -390,6 +392,7 @@ export function MapCanvas() {
           {/* Render Stations */}
           <g className="stations-layer" ref={stationsLayerRef}>
             {stationsArray.map((station) => {
+              const disabledLines = station.disabledLines || [];
               const belongingLineIds = [
                 ...new Set(
                   edgesArray
@@ -398,7 +401,8 @@ export function MapCanvas() {
                         e.station1Id === station.id ||
                         e.station2Id === station.id,
                     )
-                    .map((e) => e.lineId),
+                    .map((e) => e.lineId)
+                    .filter((lineId) => !disabledLines.includes(lineId)),
                 ),
               ];
               const primaryLineId = belongingLineIds[0];

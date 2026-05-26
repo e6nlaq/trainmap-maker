@@ -10,6 +10,7 @@ export type Station = {
   x: number;
   y: number;
   size: number;
+  disabledLines?: string[];
 };
 
 export type Edge = {
@@ -108,6 +109,7 @@ export const useMapStore = create<MapState>()(
               x,
               y,
               size: 36,
+              disabledLines: [],
             },
           },
         }));

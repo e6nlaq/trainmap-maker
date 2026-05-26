@@ -77,6 +77,7 @@ export function EditorSidebar() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [includeLegendInExport, setIncludeLegendInExport] = useState(true);
   const [isProjectMenuExpanded, setIsProjectMenuExpanded] = useState(false);
+  const [isStationLinesExpanded, setIsStationLinesExpanded] = useState(false);
 
   const selectedStation = selectedStationId
     ? stations[selectedStationId]
@@ -350,6 +351,96 @@ export function EditorSidebar() {
                     </Button>
                   </div>
                 </div>
+
+                {(() => {
+                  const stationEdges = Object.values(edges).filter(
+                    (e) =>
+                      e.station1Id === selectedStation.id ||
+                      e.station2Id === selectedStation.id,
+                  );
+                  const connectedLineIds = Array.from(
+                    new Set(stationEdges.map((e) => e.lineId)),
+                  );
+                  const connectedLines = (
+                    lineOrder && lineOrder.length > 0
+                      ? lineOrder
+                      : Object.keys(lines)
+                  )
+                    .filter((id) => connectedLineIds.includes(id))
+                    .map((id) => lines[id])
+                    .filter(Boolean);
+
+                  return (
+                    <div className="border rounded-lg overflow-hidden">
+                      <button
+                        type="button"
+                        className="w-full flex items-center justify-between p-3 bg-muted/20 hover:bg-muted/40 transition-colors text-xs font-semibold select-none"
+                        onClick={() =>
+                          setIsStationLinesExpanded(!isStationLinesExpanded)
+                        }
+                      >
+                        <span>停車路線設定</span>
+                        {isStationLinesExpanded ? (
+                          <ChevronUp className="size-3 text-muted-foreground" />
+                        ) : (
+                          <ChevronDown className="size-3 text-muted-foreground" />
+                        )}
+                      </button>
+                      {isStationLinesExpanded && (
+                        <div className="p-3 border-t space-y-3 bg-background/50">
+                          {connectedLines.length === 0 ? (
+                            <p className="text-[11px] text-muted-foreground text-center py-1">
+                              接続されている路線がありません。
+                            </p>
+                          ) : (
+                            <div className="space-y-2.5">
+                              {connectedLines.map((line) => {
+                                const disabledLines =
+                                  selectedStation.disabledLines || [];
+                                const isEnabled = !disabledLines.includes(
+                                  line.id,
+                                );
+
+                                const handleToggle = (checked: boolean) => {
+                                  const newDisabled = checked
+                                    ? disabledLines.filter(
+                                        (id) => id !== line.id,
+                                      )
+                                    : [...disabledLines, line.id];
+                                  updateStation(selectedStation.id, {
+                                    disabledLines: newDisabled,
+                                  });
+                                };
+
+                                return (
+                                  <div
+                                    key={line.id}
+                                    className="flex items-center justify-between gap-2"
+                                  >
+                                    <div className="flex items-center gap-2 min-w-0">
+                                      <div
+                                        className="size-3 rounded-full border shadow-inner shrink-0"
+                                        style={{ backgroundColor: line.color }}
+                                      />
+                                      <span className="text-[11px] font-medium truncate">
+                                        {line.name}
+                                      </span>
+                                    </div>
+                                    <Switch
+                                      id={`station-line-toggle-${line.id}`}
+                                      checked={isEnabled}
+                                      onCheckedChange={handleToggle}
+                                    />
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })()}
 
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
