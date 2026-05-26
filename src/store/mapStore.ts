@@ -255,6 +255,17 @@ export const useMapStore = create<MapState>()(
             }
           }
 
+          // If Ctrl is pressed, default the line to off (add to disabledLines) for the connected station (st2)
+          if (isCtrlPressed && st2) {
+            const currentDisabled = updatedS2.disabledLines || [];
+            if (!currentDisabled.includes(lineId)) {
+              updatedS2 = {
+                ...updatedS2,
+                disabledLines: [...currentDisabled, lineId],
+              };
+            }
+          }
+
           return {
             edges: {
               ...state.edges,
