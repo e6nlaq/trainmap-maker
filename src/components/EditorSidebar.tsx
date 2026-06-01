@@ -15,10 +15,14 @@ import {
   Settings as SettingsIcon,
   Trash2,
   Upload,
+  Share2,
+  Copy,
+  FileText,
 } from "lucide-react";
 import { useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import { useMapStore } from "@/store/mapStore";
+import { compressMapData, decompressMapData } from "@/lib/shareUtils";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -78,6 +82,34 @@ export function EditorSidebar() {
   const [includeLegendInExport, setIncludeLegendInExport] = useState(true);
   const [isProjectMenuExpanded, setIsProjectMenuExpanded] = useState(false);
   const [isStationLinesExpanded, setIsStationLinesExpanded] = useState(false);
+  const [copyStatus, setCopyStatus] = useState<"idle" | "text_copied" | "url_copied">("idle");
+  const [importShareText, setImportShareText] = useState("");
+
+  const handleCopyShareText = async () => {
+    try {
+      const data = { stations, lines, edges, lineOrder };
+      const compressed = await compressMapData(data);
+      await navigator.clipboard.writeText(compressed);
+      setCopyStatus("text_copied");
+      setTimeout(() => setCopyStatus("idle"), 2000);
+    } catch (err) {
+      console.error(err);
+      alert("コピーに失敗しました。");
+    }
+  };
+
+  const handleImportShareText = () => {
+    if (!importShareText.trim()) return;
+    decompressMapData(importShareText.trim())
+      .then((decompressed) => {
+        importData(decompressed as any);
+        setImportShareText("");
+      })
+      .catch((err) => {
+        console.error(err);
+        alert("無効な共有テキストです。データの復元に失敗しました。");
+      });
+  };
 
   const selectedStation = selectedStationId
     ? stations[selectedStationId]
@@ -834,6 +866,51 @@ export function EditorSidebar() {
                 </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>
+
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleCopyShareText}
+              className="h-8 text-[11px] col-span-2"
+            >
+              <Copy className="size-3 mr-2" />
+              {copyStatus === "text_copied" ? "コピー完了！" : "共有テキストをコピー"}
+            </Button>
+
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button variant="outline" size="sm" className="h-8 text-[11px] col-span-2">
+                  <FileText className="size-3 mr-2" />
+                  共有テキストから読み込み
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                  <DialogTitle>共有テキストから読み込み</DialogTitle>
+                  <DialogDescription>
+                    コピーされた共有用圧縮テキストを以下に貼り付けて、「読み込む」を押してください。
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="py-4">
+                  <textarea
+                    className="w-full h-32 p-2 border rounded-md text-xs font-mono resize-none focus:outline-none focus:ring-1 focus:ring-primary"
+                    placeholder="ここにテキストを貼り付けてください..."
+                    value={importShareText}
+                    onChange={(e) => setImportShareText(e.target.value)}
+                  />
+                </div>
+                <AlertDialogFooter>
+                  <DialogTrigger asChild>
+                    <Button variant="outline" size="sm">キャンセル</Button>
+                  </DialogTrigger>
+                  <DialogTrigger asChild>
+                    <Button size="sm" onClick={handleImportShareText} disabled={!importShareText.trim()}>
+                      読み込む
+                    </Button>
+                  </DialogTrigger>
+                </AlertDialogFooter>
+              </DialogContent>
+            </Dialog>
 
             <input
               type="file"
