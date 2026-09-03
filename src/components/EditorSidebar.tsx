@@ -216,7 +216,7 @@ export function EditorSidebar() {
 
         ctx.fillStyle = "#333";
         ctx.font = "bold 12px sans-serif";
-        ctx.fillText("凡例 (Legend)", x + 12, y + 24);
+        ctx.fillText("路線凡例", x + 12, y + 24);
 
         ctx.strokeStyle = "#eee";
         ctx.beginPath();

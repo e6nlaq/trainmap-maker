@@ -543,7 +543,7 @@ export function MapCanvas() {
                   <text
                     y={stSize / 2 + 26 * scale}
                     textAnchor="middle"
-                    className="font-bold fill-[#666] select-none pointer-events-none uppercase tracking-tighter"
+                    className="font-bold fill-[#666] select-none pointer-events-none capitalize tracking-tighter"
                     style={{
                       fontSize: `${10 * scale}px`,
                       paintOrder: "stroke",
@@ -584,9 +584,9 @@ export function MapCanvas() {
 
       {/* Legend (Fixed at Bottom-Right) */}
       {showLegend && linesArray.length > 0 && (
-        <div className="absolute bottom-4 right-4 p-4 bg-background/80 backdrop-blur border rounded-md shadow-sm pointer-events-none text-xs min-w-[120px] max-h-[300px] overflow-hidden flex flex-col gap-2">
+        <div className="absolute bottom-4 right-4 p-4 bg-background/80 backdrop-blur border rounded-md shadow-sm pointer-events-none text-xs min-w-[80px] min-h-[100px] overflow-hidden flex flex-col gap-2">
           <div className="font-semibold text-primary border-b pb-1.5 mb-1 tracking-tight">
-            凡例 (Legend)
+            路線凡例
           </div>
           <div className="space-y-2 overflow-y-auto">
             {linesArray.map((line) => (
