@@ -5,6 +5,18 @@ import { useMapStore } from "@/store/mapStore";
 
 const GRID_SIZE = 20;
 
+function formatCapitalize(str: string): string {
+  if (!str) return "";
+  return str
+    .split(/([\s-]+)/)
+    .map((part) =>
+      part.length > 0 && !/^[\s-]+$/.test(part)
+        ? part.charAt(0).toUpperCase() + part.slice(1).toLowerCase()
+        : part,
+    )
+    .join("");
+}
+
 export function MapCanvas() {
   const svgRef = useRef<SVGSVGElement>(null);
   const gRef = useRef<SVGGElement>(null);
@@ -217,6 +229,7 @@ export function MapCanvas() {
 
   return (
     <div
+      id="map-canvas-container"
       className="w-full h-full overflow-hidden bg-[#fbfbfb] absolute inset-0 outline-none"
       onClick={handleCanvasClick}
       onKeyDown={handleKeyDown}
@@ -490,19 +503,19 @@ export function MapCanvas() {
                           x={xPos}
                           textAnchor="middle"
                           className="select-none pointer-events-none font-bold"
-                          style={{ fill: "#333" }}
+                          style={{ fill: "#333", fontWeight: "bold" }}
                         >
                           <tspan
                             x={xPos}
                             y={-2 * scale}
-                            style={{ fontSize: `${10 * scale}px` }}
+                            style={{ fontSize: `${10 * scale}px`, fontWeight: "bold" }}
                           >
                             {alpha}
                           </tspan>
                           <tspan
                             x={xPos}
                             y={10 * scale}
-                            style={{ fontSize: `${12 * scale}px` }}
+                            style={{ fontSize: `${12 * scale}px`, fontWeight: "bold" }}
                           >
                             {digit}
                           </tspan>
@@ -533,9 +546,11 @@ export function MapCanvas() {
                     className="font-bold fill-[#222] select-none pointer-events-none"
                     style={{
                       fontSize: `${13 * scale}px`,
+                      fontWeight: "bold",
                       paintOrder: "stroke",
                       stroke: "white",
-                      strokeWidth: 3 * scale,
+                      strokeWidth: 2 * scale,
+                      fill: "#222",
                     }}
                   >
                     {station.name}
@@ -543,15 +558,17 @@ export function MapCanvas() {
                   <text
                     y={stSize / 2 + 26 * scale}
                     textAnchor="middle"
-                    className="font-bold fill-[#666] select-none pointer-events-none capitalize tracking-tighter"
+                    className="font-bold fill-[#222] select-none pointer-events-none tracking-tighter"
                     style={{
                       fontSize: `${10 * scale}px`,
+                      fontWeight: "bold",
                       paintOrder: "stroke",
                       stroke: "white",
                       strokeWidth: 2 * scale,
+                      fill: "#222",
                     }}
                   >
-                    {station.nameEn}
+                    {formatCapitalize(station.nameEn)}
                   </text>
                 </g>
               );
@@ -560,7 +577,10 @@ export function MapCanvas() {
         </g>
       </svg>
 
-      <div className="absolute top-4 left-4 p-3 bg-background/80 backdrop-blur border rounded-md shadow-sm pointer-events-none text-xs space-y-1">
+      <div
+        data-export-ignore="true"
+        className="absolute top-4 left-4 p-3 bg-background/80 backdrop-blur border rounded-md shadow-sm pointer-events-none text-xs space-y-1"
+      >
         <div className="font-semibold text-primary mb-1">
           e6nlaq式路線図メーカー
         </div>
@@ -584,11 +604,15 @@ export function MapCanvas() {
 
       {/* Legend (Fixed at Bottom-Right) */}
       {showLegend && linesArray.length > 0 && (
-        <div className="absolute bottom-4 right-4 p-4 bg-background/80 backdrop-blur border rounded-md shadow-sm pointer-events-none text-xs min-w-[80px] min-h-[100px] overflow-hidden flex flex-col gap-2">
+        <div
+          data-export-legend="true"
+          className="absolute bottom-4 right-4 p-4 bg-background/80 backdrop-blur border rounded-md shadow-sm pointer-events-none text-xs min-w-[80px] min-h-[100px] overflow-hidden flex flex-col gap-2"
+          style={{ scrollbarWidth: "none" }}
+        >
           <div className="font-semibold text-primary border-b pb-1.5 mb-1 tracking-tight">
             路線凡例
           </div>
-          <div className="space-y-2 overflow-y-auto">
+          <div className="space-y-2 min-h-[100px] overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
             {linesArray.map((line) => (
               <div key={line.id} className="flex items-center gap-2">
                 <div

@@ -22,6 +22,7 @@ import { useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import { useMapStore } from "@/store/mapStore";
 import { compressMapData, decompressMapData } from "@/lib/shareUtils";
+import { toPng } from "html-to-image";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -150,101 +151,40 @@ export function EditorSidebar() {
     URL.revokeObjectURL(url);
   };
 
-  const handleExportPng = () => {
-    const svg = document.querySelector(
-      'svg[aria-label="Train Map Canvas"]',
-    ) as SVGSVGElement | null;
-    if (!svg) return;
+  const handleExportPng = async () => {
+    const container = document.getElementById("map-canvas-container");
+    if (!container) return;
 
-    const width = svg.clientWidth;
-    const height = svg.clientHeight;
+    try {
+      const dataUrl = await toPng(container, {
+        cacheBust: true,
+        pixelRatio: 2,
+        filter: (node) => {
+          if (
+            node instanceof HTMLElement &&
+            node.getAttribute("data-export-ignore") === "true"
+          ) {
+            return false;
+          }
+          if (
+            !includeLegendInExport &&
+            node instanceof HTMLElement &&
+            node.getAttribute("data-export-legend") === "true"
+          ) {
+            return false;
+          }
+          return true;
+        },
+      });
 
-    const canvas = document.createElement("canvas");
-    canvas.width = width;
-    canvas.height = height;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
-    // Fill white background
-    ctx.fillStyle = "white";
-    ctx.fillRect(0, 0, width, height);
-
-    // Clone SVG to inject styles for export (ensuring fonts are preserved)
-    const clone = svg.cloneNode(true) as SVGSVGElement;
-    const style = document.createElementNS(
-      "http://www.w3.org/2000/svg",
-      "style",
-    );
-    style.textContent = `
-      text, tspan {
-        font-family: 'Inter', system-ui, -apple-system, sans-serif !important;
-        font-weight: bold;
-      }
-    `;
-    clone.prepend(style);
-
-    // Convert SVG to Data URL
-    const svgData = new XMLSerializer().serializeToString(clone);
-    const svgBlob = new Blob([svgData], {
-      type: "image/svg+xml;charset=utf-8",
-    });
-    const url = URL.createObjectURL(svgBlob);
-
-    const img = new Image();
-    img.onload = () => {
-      ctx.drawImage(img, 0, 0);
-
-      // Draw Legend if requested
-      if (includeLegendInExport && orderedLines.length > 0) {
-        const padding = 16;
-        const itemHeight = 20;
-        const legendWidth = 160;
-        const legendHeight = orderedLines.length * itemHeight + 40;
-        const x = width - legendWidth - padding;
-        const y = height - legendHeight - padding;
-
-        ctx.shadowColor = "rgba(0,0,0,0.1)";
-        ctx.shadowBlur = 10;
-        ctx.fillStyle = "rgba(255, 255, 255, 0.95)";
-        ctx.beginPath();
-        ctx.roundRect(x, y, legendWidth, legendHeight, 8);
-        ctx.fill();
-        ctx.shadowBlur = 0;
-        ctx.strokeStyle = "#e5e5e5";
-        ctx.lineWidth = 1;
-        ctx.stroke();
-
-        ctx.fillStyle = "#333";
-        ctx.font = "bold 12px sans-serif";
-        ctx.fillText("路線凡例", x + 12, y + 24);
-
-        ctx.strokeStyle = "#eee";
-        ctx.beginPath();
-        ctx.moveTo(x + 12, y + 32);
-        ctx.lineTo(x + legendWidth - 12, y + 32);
-        ctx.stroke();
-
-        orderedLines.forEach((line, i) => {
-          const iy = y + 50 + i * itemHeight;
-          ctx.fillStyle = line.color;
-          ctx.beginPath();
-          ctx.arc(x + 18, iy - 4, 6, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.fillStyle = "#333";
-          ctx.font = "11px sans-serif";
-          ctx.fillText(line.name, x + 30, iy);
-        });
-      }
-
-      // Download
-      const pngUrl = canvas.toDataURL("image/png");
       const downloadLink = document.createElement("a");
-      downloadLink.href = pngUrl;
+      downloadLink.href = dataUrl;
       downloadLink.download = `trainmap-${Date.now()}.png`;
       downloadLink.click();
-      URL.revokeObjectURL(url);
-    };
-    img.src = url;
+    } catch (err) {
+      console.error("PNGエクスポートエラー:", err);
+      alert("画像の出力に失敗しました。");
+    }
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
