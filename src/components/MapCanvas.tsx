@@ -563,6 +563,7 @@ export function MapCanvas() {
                       fontSize: `${10 * scale}px`,
                       fontWeight: "bold",
                       paintOrder: "stroke",
+                      fontFamily:"Inter",
                       stroke: "white",
                       strokeWidth: 2 * scale,
                       fill: "#222",
