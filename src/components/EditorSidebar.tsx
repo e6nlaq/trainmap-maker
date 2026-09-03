@@ -15,7 +15,6 @@ import {
   Settings as SettingsIcon,
   Trash2,
   Upload,
-  Share2,
   Copy,
   FileText,
 } from "lucide-react";
